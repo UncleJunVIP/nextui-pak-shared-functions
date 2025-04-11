@@ -36,8 +36,8 @@ func FetchRomDirectories() ([]models.RomDirectory, error) {
 			}
 
 			dirs = append(dirs, models.RomDirectory{
-				DisplayName: tagless,
-				Tag:         tag[1],
+				DisplayName: strings.TrimSpace(tagless),
+				Tag:         strings.TrimSpace(tag[1]),
 				Path:        path,
 			})
 		}
