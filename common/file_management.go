@@ -1,6 +1,7 @@
 package common
 
 import (
+	"github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -11,13 +12,13 @@ const romDirectory = "/mnt/SDCARD/Roms"
 
 var TagRegex = regexp.MustCompile(`\((.*?)\)`)
 
-func FetchRomDirectories() (map[string]string, error) {
-	dirs := make(map[string]string)
-
+func FetchRomDirectories() ([]models.RomDirectory, error) {
 	entries, err := os.ReadDir(romDirectory)
 	if err != nil {
 		return nil, err
 	}
+
+	var dirs []models.RomDirectory
 
 	for _, entry := range entries {
 		if entry.IsDir() {
@@ -34,7 +35,11 @@ func FetchRomDirectories() (map[string]string, error) {
 				tagless = strings.Split(tagless, ") ")[1]
 			}
 
-			dirs[tagless] = path
+			dirs = append(dirs, models.RomDirectory{
+				DisplayName: tagless,
+				Tag:         tag[1],
+				Path:        path,
+			})
 		}
 	}
 
