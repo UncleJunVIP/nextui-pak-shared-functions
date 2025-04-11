@@ -6,6 +6,10 @@ import (
 	"os/exec"
 )
 
+func ShowMessage(message string, timeout string) (int, error) {
+	return ShowMessageWithOptions(message, timeout)
+}
+
 func ShowMessageWithOptions(message string, timeout string, options ...string) (int, error) {
 	args := []string{"--message", message, "--timeout", timeout}
 
