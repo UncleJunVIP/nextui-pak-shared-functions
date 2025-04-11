@@ -27,9 +27,14 @@ func FetchRomDirectories() (map[string]string, error) {
 			}
 
 			path := filepath.Join(romDirectory, entry.Name())
-			tagless := strings.TrimSuffix(entry.Name(), tag[1])
-			dirs[tagless] = path
+			tagless := strings.TrimSuffix(entry.Name(), tag[0])
 
+			// For people that order their ROM directories
+			if strings.Contains(tagless, ") ") {
+				tagless = strings.Split(tagless, ") ")[1]
+			}
+
+			dirs[tagless] = path
 		}
 	}
 
