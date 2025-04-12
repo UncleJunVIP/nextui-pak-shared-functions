@@ -13,7 +13,7 @@ const RomDirectory = "/mnt/SDCARD/Roms"
 var TagRegex = regexp.MustCompile(`\((.*?)\)`)
 
 func FetchRomDirectories() ([]models.RomDirectory, error) {
-	entries, err := os.ReadDir(romDirectory)
+	entries, err := os.ReadDir(RomDirectory)
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +27,7 @@ func FetchRomDirectories() ([]models.RomDirectory, error) {
 				continue
 			}
 
-			path := filepath.Join(romDirectory, entry.Name())
+			path := filepath.Join(RomDirectory, entry.Name())
 			tagless := strings.TrimSuffix(entry.Name(), tag[0])
 
 			// For people that order their ROM directories
@@ -49,7 +49,7 @@ func FetchRomDirectories() ([]models.RomDirectory, error) {
 func FetchRomDirectoriesByTag() (map[string]string, error) {
 	dirs := make(map[string]string)
 
-	entries, err := os.ReadDir(romDirectory)
+	entries, err := os.ReadDir(RomDirectory)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func FetchRomDirectoriesByTag() (map[string]string, error) {
 				continue
 			}
 
-			path := filepath.Join(romDirectory, entry.Name())
+			path := filepath.Join(RomDirectory, entry.Name())
 			dirs[tag[1]] = path
 
 		}
