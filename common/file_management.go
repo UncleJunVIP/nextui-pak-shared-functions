@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const romDirectory = "/mnt/SDCARD/Roms"
+const RomDirectory = "/mnt/SDCARD/Roms"
 
 var TagRegex = regexp.MustCompile(`\((.*?)\)`)
 
