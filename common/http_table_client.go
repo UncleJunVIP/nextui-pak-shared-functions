@@ -7,6 +7,7 @@ import (
 	converthtmltabletodata "github.com/activcoding/HTML-Table-to-JSON"
 	"net/http"
 	"net/url"
+	"path"
 	"qlova.tech/sum"
 	"strings"
 )
@@ -44,7 +45,7 @@ func (c *HttpTableClient) ListDirectory(section sharedModels.Section) ([]sharedM
 		params.Add("F", "2") // To enable table mode for mod_autoindex
 	}
 
-	combinedUrl := c.RootURL + section.HostSubdirectory
+	combinedUrl := path.Join(c.RootURL, section.HostSubdirectory)
 	u, err := url.Parse(combinedUrl)
 	if err != nil {
 		return nil, fmt.Errorf("unable to parse table URL: %v", err)
