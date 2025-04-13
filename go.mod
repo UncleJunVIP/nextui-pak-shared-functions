@@ -10,8 +10,8 @@ require (
 )
 
 require (
-	github.com/PuerkitoBio/goquery v1.9.2 // indirect
-	github.com/andybalholm/cascadia v1.3.2 // indirect
-	go.uber.org/multierr v1.10.0 // indirect
-	golang.org/x/net v0.24.0 // indirect
+	github.com/PuerkitoBio/goquery v1.10.3 // indirect
+	github.com/andybalholm/cascadia v1.3.3 // indirect
+	go.uber.org/multierr v1.11.0 // indirect
+	golang.org/x/net v0.39.0 // indirect
 )

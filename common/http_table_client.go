@@ -5,6 +5,7 @@ import (
 	"fmt"
 	sharedModels "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	converthtmltabletodata "github.com/activcoding/HTML-Table-to-JSON"
+	"go.uber.org/zap"
 	"net/http"
 	"net/url"
 	"path"
@@ -38,6 +39,7 @@ func (c *HttpTableClient) Close() error {
 }
 
 func (c *HttpTableClient) ListDirectory(section sharedModels.Section) ([]sharedModels.Item, error) {
+	logger := GetLoggerInstance()
 	params := url.Values{}
 
 	switch c.HostType {
@@ -46,6 +48,9 @@ func (c *HttpTableClient) ListDirectory(section sharedModels.Section) ([]sharedM
 	}
 
 	combinedUrl := path.Join(c.RootURL, section.HostSubdirectory)
+
+	logger.Debug("Listing Directory", zap.String("combined_url", combinedUrl))
+
 	u, err := url.Parse(combinedUrl)
 	if err != nil {
 		return nil, fmt.Errorf("unable to parse table URL: %v", err)
