@@ -5,18 +5,20 @@ import (
 	"errors"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"os"
+	"path"
 	"path/filepath"
+	"qlova.tech/sum"
 )
 
 const ThumbnailServerRoot = "https://thumbnails.libretro.com"
-const NamedBoxArtStub = "Named_Boxarts/"
 
 type ThumbnailClient struct {
 	HttpTableClient
-	SystemMapping map[string]string
+	SystemMapping   map[string]string
+	ArtDownloadType sum.Int[models.ArtDownloadType]
 }
 
-func NewThumbnailClient() *ThumbnailClient {
+func NewThumbnailClient(artDownloadType sum.Int[models.ArtDownloadType]) *ThumbnailClient {
 	client := &ThumbnailClient{
 		HttpTableClient: HttpTableClient{
 			RootURL:  ThumbnailServerRoot,
@@ -27,6 +29,7 @@ func NewThumbnailClient() *ThumbnailClient {
 				DateHeader:     "",
 			},
 		},
+		ArtDownloadType: artDownloadType,
 	}
 
 	cwd, _ := os.Getwd()
@@ -43,7 +46,7 @@ func NewThumbnailClient() *ThumbnailClient {
 
 func (c *ThumbnailClient) BuildThumbnailSection(tag string) models.Section {
 	systemName := c.SystemMapping[tag]
-	subdirectory := "/" + systemName + "/" + NamedBoxArtStub
+	subdirectory := path.Join(systemName, models.ArtDownloadTypeMapping[c.ArtDownloadType])
 
 	return models.Section{
 		Name:             tag,
