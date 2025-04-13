@@ -2,7 +2,7 @@ package common
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"os"
 	"path"
@@ -63,7 +63,7 @@ func (c *ThumbnailClient) ListDirectory(section models.Section) ([]models.Item, 
 	artList, err := c.HttpTableClient.ListDirectory(section)
 
 	if err != nil {
-		return nil, errors.New("unable to list thumbnail directory")
+		return nil, fmt.Errorf("unable to list thumbnail directory: %w", err)
 	}
 
 	return artList, nil
