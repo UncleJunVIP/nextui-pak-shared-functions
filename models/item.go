@@ -44,3 +44,11 @@ func (items Items) Values() []string {
 	}
 	return list
 }
+
+func (items Items) MarshalLogArray(enc zapcore.ArrayEncoder) error {
+	for _, item := range items {
+		_ = enc.AppendObject(item)
+	}
+
+	return nil
+}
