@@ -40,7 +40,7 @@ func (c *FileBrowser) CWD(newDirectory string) error {
 
 		log.Println(file.Name())
 
-		displayName, tag := entryNameCleaner(file.Name())
+		displayName, tag := itemNameCleaner(file.Name())
 
 		item := models.Item{
 			DisplayName: displayName,
@@ -71,7 +71,7 @@ func (c *FileBrowser) DisplayCurrentDirectory(title string) (models.Item, error)
 	return c.HumanReadableLS[res.Value], nil
 }
 
-func entryNameCleaner(filename string) (string, string) {
+func itemNameCleaner(filename string) (string, string) {
 	cleaned := filepath.Clean(filename)
 
 	// Clean up the tags
@@ -80,6 +80,8 @@ func entryNameCleaner(filename string) (string, string) {
 	foundTag := ""
 	if len(tag) > 0 {
 		foundTag = tag[0]
+		foundTag = strings.ReplaceAll(foundTag, "(", "")
+		foundTag = strings.ReplaceAll(foundTag, ")", "")
 		cleaned = strings.TrimSuffix(filename, tag[0])
 	}
 
