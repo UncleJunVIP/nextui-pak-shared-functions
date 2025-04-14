@@ -1,71 +1,21 @@
 package common
 
 import (
-	"github.com/UncleJunVIP/nextui-pak-shared-functions/models"
+	"go.uber.org/zap"
 	"os"
-	"path/filepath"
-	"regexp"
-	"strings"
 )
 
-const RomDirectory = "/mnt/SDCARD/Roms"
+func DeleteFile(path string) bool {
+	logger := GetLoggerInstance()
 
-var TagRegex = regexp.MustCompile(`\((.*?)\)`)
-
-func FetchRomDirectories() ([]models.RomDirectory, error) {
-	entries, err := os.ReadDir(RomDirectory)
+	err := os.Remove(path)
 	if err != nil {
-		return nil, err
+		logger.Error("Issue removing file",
+			zap.String("path", path),
+			zap.Error(err))
+		return false
+	} else {
+		logger.Debug("Removed file", zap.String("path", path))
+		return true
 	}
-
-	var dirs []models.RomDirectory
-
-	for _, entry := range entries {
-		if entry.IsDir() {
-			tag := TagRegex.FindStringSubmatch(entry.Name())
-			if tag == nil {
-				continue
-			}
-
-			path := filepath.Join(RomDirectory, entry.Name())
-			tagless := strings.TrimSuffix(entry.Name(), tag[0])
-
-			// For people that order their ROM directories
-			if strings.Contains(tagless, ") ") {
-				tagless = strings.Split(tagless, ") ")[1]
-			}
-
-			dirs = append(dirs, models.RomDirectory{
-				DisplayName: strings.TrimSpace(tagless),
-				Tag:         strings.TrimSpace(tag[1]),
-				Path:        path,
-			})
-		}
-	}
-
-	return dirs, nil
-}
-
-func FetchRomDirectoriesByTag() (map[string]string, error) {
-	dirs := make(map[string]string)
-
-	entries, err := os.ReadDir(RomDirectory)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, entry := range entries {
-		if entry.IsDir() {
-			tag := TagRegex.FindStringSubmatch(entry.Name())
-			if tag == nil {
-				continue
-			}
-
-			path := filepath.Join(RomDirectory, entry.Name())
-			dirs[tag[1]] = path
-
-		}
-	}
-
-	return dirs, nil
 }

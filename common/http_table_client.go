@@ -3,7 +3,7 @@ package common
 import (
 	"encoding/json"
 	"fmt"
-	sharedModels "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
+	"github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	converthtmltabletodata "github.com/activcoding/HTML-Table-to-JSON"
 	"go.uber.org/zap"
 	"net/http"
@@ -13,17 +13,17 @@ import (
 	"strings"
 )
 
-type HostType = sum.Int[sharedModels.HostType]
+type HostType = sum.Int[models.HostType]
 
 type HttpTableClient struct {
 	RootURL            string
 	HostType           HostType
-	TableColumns       sharedModels.TableColumns
+	TableColumns       models.TableColumns
 	SourceReplacements map[string]string
 	Filters            []string
 }
 
-func NewHttpTableClient(rootURL string, hostType HostType, tableColumns sharedModels.TableColumns,
+func NewHttpTableClient(rootURL string, hostType HostType, tableColumns models.TableColumns,
 	sourceReplacements map[string]string, filters []string) *HttpTableClient {
 	return &HttpTableClient{
 		RootURL:            rootURL,
@@ -38,16 +38,16 @@ func (c *HttpTableClient) Close() error {
 	return nil
 }
 
-func (c *HttpTableClient) ListDirectory(section sharedModels.Section) ([]sharedModels.Item, error) {
+func (c *HttpTableClient) ListDirectory(subdirectory string) ([]models.Item, error) {
 	logger := GetLoggerInstance()
 	params := url.Values{}
 
 	switch c.HostType {
-	case sharedModels.HostTypes.APACHE:
+	case models.HostTypes.APACHE:
 		params.Add("F", "2") // To enable table mode for mod_autoindex
 	}
 
-	combinedUrl := path.Join(c.RootURL, section.HostSubdirectory)
+	combinedUrl := path.Join(c.RootURL, subdirectory)
 
 	logger.Debug("Listing Directory", zap.String("combined_url", combinedUrl))
 
@@ -73,13 +73,13 @@ func (c *HttpTableClient) ListDirectory(section sharedModels.Section) ([]sharedM
 	cleaned := rawJson
 
 	switch c.HostType {
-	case sharedModels.HostTypes.APACHE:
+	case models.HostTypes.APACHE:
 		cleaned = strings.ReplaceAll(cleaned, "[[", "[")
 		cleaned = strings.ReplaceAll(cleaned, "]]", "]")
 		cleaned = strings.ReplaceAll(cleaned, "Name", "filename")
 		cleaned = strings.ReplaceAll(cleaned, "Size", "file_size")
 		cleaned = strings.ReplaceAll(cleaned, "Last modified", "date")
-	case sharedModels.HostTypes.MEGATHREAD:
+	case models.HostTypes.MEGATHREAD:
 		{
 			cleaned = strings.ReplaceAll(cleaned, "  ↓", "")
 			cleaned = strings.ReplaceAll(cleaned, "[[", "[")
@@ -88,7 +88,7 @@ func (c *HttpTableClient) ListDirectory(section sharedModels.Section) ([]sharedM
 			cleaned = strings.ReplaceAll(cleaned, "File Size", "file_size")
 			cleaned = strings.ReplaceAll(cleaned, "Date", "date")
 		}
-	case sharedModels.HostTypes.CUSTOM:
+	case models.HostTypes.CUSTOM:
 		{
 			for oldValue, newValue := range c.SourceReplacements {
 				cleaned = strings.ReplaceAll(cleaned, oldValue, newValue)
@@ -101,7 +101,7 @@ func (c *HttpTableClient) ListDirectory(section sharedModels.Section) ([]sharedM
 
 	}
 
-	var items []sharedModels.Item
+	var items []models.Item
 	err = json.Unmarshal([]byte(cleaned), &items)
 	if err != nil {
 		return nil, fmt.Errorf("unable to marshal json: %v", err)
@@ -109,8 +109,8 @@ func (c *HttpTableClient) ListDirectory(section sharedModels.Section) ([]sharedM
 
 	// Skip the header row(s)
 	switch c.HostType {
-	case sharedModels.HostTypes.APACHE,
-		sharedModels.HostTypes.MEGATHREAD:
+	case models.HostTypes.APACHE,
+		models.HostTypes.MEGATHREAD:
 		{
 			if len(items) > 1 {
 				return items[1:], nil
@@ -121,10 +121,10 @@ func (c *HttpTableClient) ListDirectory(section sharedModels.Section) ([]sharedM
 	return nil, nil
 }
 
-func (c *HttpTableClient) DownloadFile(remotePath, localPath, filename string) error {
+func (c *HttpTableClient) DownloadFile(remotePath, localPath, filename string) (string, error) {
 	return HttpDownload(c.RootURL, remotePath, localPath, filename)
 }
 
-func (c *HttpTableClient) DownloadFileRename(remotePath, localPath, filename, rename string) error {
+func (c *HttpTableClient) DownloadFileRename(remotePath, localPath, filename, rename string) (string, error) {
 	panic("not implemented")
 }

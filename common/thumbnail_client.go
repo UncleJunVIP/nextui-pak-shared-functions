@@ -60,7 +60,7 @@ func (c *ThumbnailClient) Close() error {
 }
 
 func (c *ThumbnailClient) ListDirectory(section models.Section) ([]models.Item, error) {
-	artList, err := c.HttpTableClient.ListDirectory(section)
+	artList, err := c.HttpTableClient.ListDirectory(section.HostSubdirectory)
 
 	if err != nil {
 		return nil, fmt.Errorf("unable to list thumbnail directory: %w", err)
@@ -69,10 +69,10 @@ func (c *ThumbnailClient) ListDirectory(section models.Section) ([]models.Item, 
 	return artList, nil
 }
 
-func (c *ThumbnailClient) DownloadFile(remotePath, localPath, filename string) error {
+func (c *ThumbnailClient) DownloadFile(remotePath, localPath, filename string) (lastSavedPath string, error error) {
 	return HttpDownload(c.RootURL, remotePath, localPath, filename)
 }
 
-func (c *ThumbnailClient) DownloadFileRename(remotePath, localPath, filename, rename string) (lastSavedArtPath string, error error) {
+func (c *ThumbnailClient) DownloadFileRename(remotePath, localPath, filename, rename string) (lastSavedPath string, error error) {
 	return HttpDownloadRename(c.RootURL, remotePath, localPath, filename, rename)
 }

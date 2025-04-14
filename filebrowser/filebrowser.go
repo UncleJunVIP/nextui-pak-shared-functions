@@ -1,0 +1,99 @@
+package filebrowser
+
+import (
+	"fmt"
+	"github.com/UncleJunVIP/nextui-pak-shared-functions/models"
+	"github.com/UncleJunVIP/nextui-pak-shared-functions/ui"
+	"go.uber.org/zap"
+	"log"
+	"os"
+	"path"
+	"path/filepath"
+	"regexp"
+	"strings"
+)
+
+type FileBrowser struct {
+	logger           *zap.Logger
+	WorkingDirectory string
+	Items            models.Items
+	HumanReadableLS  map[string]models.Item
+}
+
+func NewFileBrowser(logger *zap.Logger, cwd string) *FileBrowser {
+	return &FileBrowser{
+		logger:           logger,
+		WorkingDirectory: cwd,
+	}
+}
+
+func (c *FileBrowser) CWD(newDirectory string) error {
+	files, err := os.ReadDir(newDirectory)
+	if err != nil {
+		return fmt.Errorf("failed to read directory %w", err)
+	}
+
+	c.WorkingDirectory = newDirectory
+	updatedHumanReadable := make(map[string]models.Item)
+
+	var items []models.Item
+	for _, file := range files {
+
+		log.Println(file.Name())
+
+		displayName, tag := entryNameCleaner(file.Name())
+
+		item := models.Item{
+			DisplayName: displayName,
+			Tag:         tag,
+			Filename:    file.Name(),
+			Path:        path.Join(c.WorkingDirectory, file.Name()),
+			IsDirectory: file.IsDir(),
+		}
+
+		items = append(items, item)
+
+		updatedHumanReadable[displayName] = item
+	}
+
+	c.Items = items
+	c.HumanReadableLS = updatedHumanReadable
+
+	return nil
+}
+
+func (c *FileBrowser) DisplayCurrentDirectory(title string) (models.Item, error) {
+	res, err := ui.Launch(c.Items, title, "")
+
+	if err != nil {
+		return models.Item{}, err
+	}
+
+	return c.HumanReadableLS[res.Value], nil
+}
+
+func entryNameCleaner(filename string) (string, string) {
+	cleaned := filepath.Clean(filename)
+
+	// Clean up the tags
+	var tagRegex = regexp.MustCompile(`\((.*?)\)`)
+	tag := tagRegex.FindStringSubmatch(cleaned)
+
+	foundTag := ""
+	if len(tag) > 0 {
+		foundTag = tag[0]
+		cleaned = strings.TrimSuffix(filename, tag[0])
+	}
+
+	// For people that order their ROM directories
+	if strings.Contains(cleaned, ") ") {
+		cleaned = strings.Split(cleaned, ") ")[1]
+	}
+
+	// Lose the extension
+	cleaned = strings.ReplaceAll(cleaned, path.Ext(cleaned), "")
+
+	cleaned = strings.TrimSpace(cleaned)
+
+	return cleaned, foundTag
+}

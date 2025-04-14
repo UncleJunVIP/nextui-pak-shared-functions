@@ -1,7 +1,6 @@
 package models
 
-type Selection struct {
-	Value string
-	Code  int
-	Error error
+type ListSelection struct {
+	Value    string
+	ExitCode int
 }

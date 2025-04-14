@@ -11,13 +11,11 @@ import (
 	"strings"
 )
 
-func HttpDownload(rootURL, remotePath, localPath, filename string) error {
-	_, err := HttpDownloadRename(rootURL, remotePath, localPath, filename, "")
-
-	return err
+func HttpDownload(rootURL, remotePath, localPath, filename string) (savedPath string, error error) {
+	return HttpDownloadRename(rootURL, remotePath, localPath, filename, "")
 }
 
-func HttpDownloadRename(rootURL, remotePath, localPath, filename, rename string) (lastSavedArtPath string, error error) {
+func HttpDownloadRename(rootURL, remotePath, localPath, filename, rename string) (savedPath string, error error) {
 	logger := GetLoggerInstance()
 
 	logger.Debug("Downloading file...",
@@ -47,7 +45,7 @@ func HttpDownloadRename(rootURL, remotePath, localPath, filename, rename string)
 	if rename != "" {
 		// Used by the thumbnail downloader when a filename doesn't have the matching tags
 		imageExt := filepath.Ext(filename)
-		fn = strings.TrimSuffix(rename, filepath.Ext(rename))
+		fn = strings.ReplaceAll(rename, filepath.Ext(rename), "")
 		fn = fn + imageExt
 	}
 
