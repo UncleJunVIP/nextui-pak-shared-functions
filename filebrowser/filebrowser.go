@@ -2,6 +2,7 @@ package filebrowser
 
 import (
 	"fmt"
+	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/ui"
 	"go.uber.org/zap"
@@ -9,7 +10,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"regexp"
 	"strings"
 )
 
@@ -76,7 +76,7 @@ func entryNameCleaner(filename string) (string, string) {
 	cleaned := filepath.Clean(filename)
 
 	// Clean up the tags
-	tag := TagRegex.FindStringSubmatch(cleaned)
+	tag := common.TagRegex.FindStringSubmatch(cleaned)
 
 	foundTag := ""
 	if len(tag) > 0 {
