@@ -38,7 +38,7 @@ func (c *HttpTableClient) Close() error {
 	return nil
 }
 
-func (c *HttpTableClient) ListDirectory(subdirectory string) ([]models.Item, error) {
+func (c *HttpTableClient) ListDirectory(subdirectory string) (models.Items, error) {
 	logger := GetLoggerInstance()
 	params := url.Values{}
 
@@ -101,7 +101,7 @@ func (c *HttpTableClient) ListDirectory(subdirectory string) ([]models.Item, err
 
 	}
 
-	var items []models.Item
+	var items models.Items
 	err = json.Unmarshal([]byte(cleaned), &items)
 	if err != nil {
 		return nil, fmt.Errorf("unable to marshal json: %v", err)

@@ -59,7 +59,7 @@ func (c *ThumbnailClient) Close() error {
 	return nil
 }
 
-func (c *ThumbnailClient) ListDirectory(section models.Section) ([]models.Item, error) {
+func (c *ThumbnailClient) ListDirectory(section models.Section) ([]models.Items, error) {
 	artList, err := c.HttpTableClient.ListDirectory(section.HostSubdirectory)
 
 	if err != nil {
