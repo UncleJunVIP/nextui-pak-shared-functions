@@ -13,7 +13,7 @@ type Entries interface {
 	Values() []string
 }
 
-func Launch(entries Entries, title string, actionText string, options ...string) (models.ListSelection, error) {
+func DisplayList(entries Entries, title string, actionText string, options ...string) (models.ListSelection, error) {
 	args := []string{"--format", "text", "--title", title, "--file", "-"}
 
 	if actionText != "" {

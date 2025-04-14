@@ -63,7 +63,7 @@ func (c *FileBrowser) CWD(newDirectory string) error {
 }
 
 func (c *FileBrowser) DisplayCurrentDirectory(title string) (models.Item, error) {
-	res, err := ui.Launch(c.Items, title, "")
+	res, err := ui.DisplayList(c.Items, title, "")
 
 	if err != nil {
 		return models.Item{}, err
