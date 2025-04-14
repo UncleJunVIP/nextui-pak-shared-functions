@@ -20,10 +20,9 @@ type FileBrowser struct {
 	HumanReadableLS  map[string]models.Item
 }
 
-func NewFileBrowser(logger *zap.Logger, cwd string) *FileBrowser {
+func NewFileBrowser(logger *zap.Logger) *FileBrowser {
 	return &FileBrowser{
-		logger:           logger,
-		WorkingDirectory: cwd,
+		logger: logger,
 	}
 }
 
