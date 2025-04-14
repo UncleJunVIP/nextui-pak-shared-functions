@@ -8,7 +8,6 @@ import (
 	"go.uber.org/zap"
 	"net/http"
 	"net/url"
-	"path"
 	"qlova.tech/sum"
 	"strings"
 )
@@ -47,7 +46,10 @@ func (c *HttpTableClient) ListDirectory(subdirectory string) (models.Items, erro
 		params.Add("F", "2") // To enable table mode for mod_autoindex
 	}
 
-	combinedUrl := path.Join(c.RootURL, subdirectory)
+	combinedUrl, err := url.JoinPath(c.RootURL, subdirectory)
+	if err != nil {
+		return nil, fmt.Errorf("unable to build download url: %w", err)
+	}
 
 	logger.Debug("Listing Directory", zap.String("combined_url", combinedUrl))
 
