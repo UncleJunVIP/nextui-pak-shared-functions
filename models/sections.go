@@ -9,23 +9,26 @@ type Section struct {
 	LocalDirectory string `yaml:"local_directory"`
 
 	HostSubdirectory string `yaml:"host_subdirectory"`
+
+	RomMPlatformID string `yaml:"romm_platform_id"`
 }
 
 type Sections []Section
 
-func (s Sections) MarshalLogArray(enc zapcore.ArrayEncoder) error {
+func (s Sections) MarshalLogArray(encoder zapcore.ArrayEncoder) error {
 	for _, section := range s {
-		_ = enc.AppendObject(section)
+		_ = encoder.AppendObject(section)
 	}
 
 	return nil
 }
 
-func (s Section) MarshalLogObject(enc zapcore.ObjectEncoder) error {
-	enc.AddString("name", s.Name)
-	enc.AddString("system_tag", s.SystemTag)
-	enc.AddString("local_directory", s.LocalDirectory)
-	enc.AddString("host_subdirectory", s.HostSubdirectory)
+func (s Section) MarshalLogObject(encoder zapcore.ObjectEncoder) error {
+	encoder.AddString("name", s.Name)
+	encoder.AddString("system_tag", s.SystemTag)
+	encoder.AddString("local_directory", s.LocalDirectory)
+	encoder.AddString("host_subdirectory", s.HostSubdirectory)
+	encoder.AddString("romm_platform_id", s.RomMPlatformID)
 
 	return nil
 }
