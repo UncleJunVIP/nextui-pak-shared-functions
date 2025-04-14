@@ -76,8 +76,7 @@ func entryNameCleaner(filename string) (string, string) {
 	cleaned := filepath.Clean(filename)
 
 	// Clean up the tags
-	var tagRegex = regexp.MustCompile(`\((.*?)\)`)
-	tag := tagRegex.FindStringSubmatch(cleaned)
+	tag := TagRegex.FindStringSubmatch(cleaned)
 
 	foundTag := ""
 	if len(tag) > 0 {
