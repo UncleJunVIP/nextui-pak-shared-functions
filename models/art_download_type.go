@@ -17,3 +17,10 @@ var ArtDownloadTypeMapping = map[sum.Int[ArtDownloadType]]string{
 	ArtDownloadTypes.LOGOS:        "Named_Logos",
 	ArtDownloadTypes.SCREENSHOTS:  "Named_Snaps",
 }
+
+var ArtDownloadTypeFromString = map[string]sum.Int[ArtDownloadType]{
+	"BOX_ART":      ArtDownloadTypes.BOX_ART,
+	"TITLE_SCREEN": ArtDownloadTypes.TITLE_SCREEN,
+	"LOGOS":        ArtDownloadTypes.LOGOS,
+	"SCREENSHOTS":  ArtDownloadTypes.SCREENSHOTS,
+}
