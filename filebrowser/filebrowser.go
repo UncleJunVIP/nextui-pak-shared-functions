@@ -6,7 +6,6 @@ import (
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/ui"
 	"go.uber.org/zap"
-	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -37,22 +36,31 @@ func (c *FileBrowser) CWD(newDirectory string) error {
 
 	var items []models.Item
 	for _, file := range files {
+		displayName, tag := itemNameCleaner(file.Name(), false)
 
-		log.Println(file.Name())
+		directoryFileCount := -1
+		if file.IsDir() {
+			dir, err := os.ReadDir(path.Join(c.WorkingDirectory, file.Name()))
+			if err != nil {
+				c.logger.Error("Failed to read directory", zap.String("path", path.Join(c.WorkingDirectory, file.Name())), zap.Error(err))
+			}
 
-		displayName, tag := itemNameCleaner(file.Name())
-
-		item := models.Item{
-			DisplayName: displayName,
-			Tag:         tag,
-			Filename:    file.Name(),
-			Path:        path.Join(c.WorkingDirectory, file.Name()),
-			IsDirectory: file.IsDir(),
+			directoryFileCount = len(dir)
 		}
 
-		items = append(items, item)
+		item := models.Item{
+			DisplayName:        displayName,
+			Tag:                tag,
+			Filename:           file.Name(),
+			Path:               path.Join(c.WorkingDirectory, file.Name()),
+			IsDirectory:        file.IsDir(),
+			DirectoryFileCount: directoryFileCount,
+		}
 
-		updatedHumanReadable[displayName] = item
+		if !file.IsDir() || directoryFileCount > 0 { // Hide them empty directories the lunatics leave behind...
+			items = append(items, item)
+			updatedHumanReadable[displayName] = item
+		}
 	}
 
 	c.Items = items
@@ -71,14 +79,14 @@ func (c *FileBrowser) DisplayCurrentDirectory(title string) (models.Item, error)
 	return c.HumanReadableLS[res.Value], nil
 }
 
-func itemNameCleaner(filename string) (string, string) {
+func itemNameCleaner(filename string, stripTag bool) (string, string) {
 	cleaned := filepath.Clean(filename)
 
 	// Clean up the tags
 	tag := common.TagRegex.FindStringSubmatch(cleaned)
 
 	foundTag := ""
-	if len(tag) > 0 {
+	if len(tag) > 0 && stripTag {
 		foundTag = tag[0]
 		foundTag = strings.ReplaceAll(foundTag, "(", "")
 		foundTag = strings.ReplaceAll(foundTag, ")", "")

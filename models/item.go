@@ -5,11 +5,12 @@ import "go.uber.org/zap/zapcore"
 type Item struct {
 	DisplayName string `json:"name"`
 
-	Filename     string `json:"filename"`
-	Path         string `json:"path"`
-	IsDirectory  bool   `json:"is_directory"`
-	FileSize     string `json:"file_size"`
-	LastModified string `json:"last_modified"`
+	Filename           string `json:"filename"`
+	Path               string `json:"path"`
+	IsDirectory        bool   `json:"is_directory"`
+	DirectoryFileCount int    `json:"-"`
+	FileSize           string `json:"file_size"`
+	LastModified       string `json:"last_modified"`
 
 	Tag string `json:"tag"`
 
