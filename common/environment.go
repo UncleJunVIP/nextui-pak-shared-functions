@@ -1,12 +1,19 @@
 package common
 
 import (
+	_ "github.com/UncleJunVIP/certifiable"
 	"os"
 	"path/filepath"
 )
 
+func init() {
+	InitIncludes()
+	ConfigureEnvironment()
+}
+
 func ConfigureEnvironment() {
 	cwd, err := os.Getwd()
+
 	if err != nil {
 		LogStandardFatal("Failed to get current working directory", err)
 	}
@@ -22,10 +29,5 @@ func ConfigureEnvironment() {
 	}
 	if err := os.Setenv("LD_LIBRARY_PATH", "/mnt/SDCARD/.system/tg5040/lib:/usr/trimui/lib"); err != nil {
 		LogStandardFatal("Failed to set LD_LIBRARY_PATH", err)
-	}
-
-	// So users don't have to install TrimUI_EX
-	if err := os.Setenv("SSL_CERT_DIR", filepath.Join(cwd, "certs")); err != nil {
-		LogStandardFatal("Failed to set SSL_CERT_DIR", err)
 	}
 }

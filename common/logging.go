@@ -17,17 +17,7 @@ var logger atomic.Pointer[zap.Logger]
 
 var LoggerInitialized atomic.Bool
 
-var logfileName atomic.String
 var onceLogger sync.Once
-
-func init() {
-	exePath, err := os.Executable()
-	if err != nil {
-		LogStandardFatal("Couldn't determine executable path: %v", err)
-	}
-
-	logfileName.Store(filepath.Base(exePath) + ".log")
-}
 
 func LogStandardFatal(msg string, err error) {
 	log.SetOutput(os.Stderr)
@@ -49,12 +39,19 @@ func CloseLogger() {
 func createLogger() *zap.Logger {
 	LoggerInitialized.Store(false)
 
+	exePath, err := os.Executable()
+	if err != nil {
+		LogStandardFatal("Couldn't determine executable path: %v", err)
+	}
+
+	logFileName := filepath.Base(exePath) + ".log"
+
 	cwd, err := os.Getwd()
 	if err != nil {
 		LogStandardFatal("Failed to get current working directory", err)
 	}
 
-	logFile, err = os.OpenFile(filepath.Join(cwd, logfileName.String()), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	logFile, err = os.OpenFile(filepath.Join(cwd, logFileName), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		LogStandardFatal("Unable to open log file!", err)
 	}
