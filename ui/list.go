@@ -39,7 +39,7 @@ func DisplayList(entries Entries, title string, actionText string, options ...st
 		cmd.Err = nil
 	}
 
-	if err := cmd.Run(); err != nil {
+	if err := cmd.Run(); err != nil && cmd.ProcessState.ExitCode() > 5 {
 		return models.ListSelection{
 			Value:    "",
 			ExitCode: cmd.ProcessState.ExitCode(),

@@ -1,58 +1,78 @@
 package common
 
 import (
-	"embed"
+	_ "embed"
 	"go.uber.org/zap"
-	"io/fs"
 	"os"
 	"path/filepath"
 )
 
-//go:embed resources
-var resources embed.FS
+//go:embed resources/data/systems-mapping.json
+var systemMapping []byte
+
+//go:embed resources/bin/tg5040/minui-keyboard
+var keyboard []byte
+
+//go:embed resources/bin/tg5040/minui-list
+var list []byte
+
+//go:embed resources/bin/tg5040/minui-presenter
+var presenter []byte
 
 func InitIncludes() {
 	logger := GetLoggerInstance()
 	cwd, _ := os.Getwd()
 
-	if err := os.MkdirAll(filepath.Join(cwd, "bin"), 0755); err != nil {
-		logger.Fatal("Failed to create bin directory", zap.Error(err))
+	binPath := filepath.Join(cwd, "bin/tg5040")
+	dataPath := filepath.Join(cwd, "data")
+
+	binExists := false
+	dataExists := false
+
+	if _, err := os.Stat(binPath); os.IsNotExist(err) {
+		err := os.MkdirAll(binPath, 0755)
+		if err != nil {
+			logger.Fatal("Failed to create bin directory", zap.Error(err))
+		}
+	} else {
+		binExists = true
 	}
 
-	if err := os.MkdirAll(filepath.Join(cwd, "bin"), 0755); err != nil {
-		logger.Fatal("Failed to create bin directory", zap.Error(err))
+	if _, err := os.Stat(dataPath); os.IsNotExist(err) {
+		err := os.MkdirAll(dataPath, 0755)
+		if err != nil {
+			logger.Fatal("Failed to create data directory", zap.Error(err))
+		}
+	} else {
+		dataExists = true
 	}
 
-	binaries, err := resources.ReadDir("resources/bin/tg5040")
-	if err != nil {
-		logger.Fatal("Failed to read bin directory", zap.Error(err))
+	if binExists && dataExists {
+		return
 	}
 
-	dataFiles, err := resources.ReadDir("resources/data")
-	if err != nil {
-		logger.Fatal("Failed to read bin directory", zap.Error(err))
+	if !binExists {
+		saveFile(keyboard, filepath.Join(binPath, "minui-keyboard"))
+		saveFile(list, filepath.Join(binPath, "minui-list"))
+		saveFile(presenter, filepath.Join(binPath, "minui-presenter"))
 	}
 
-	for _, file := range binaries {
-		saveFile(file, resources, "resources/bin/tg5040/", "bin/tg5040")
-	}
-
-	for _, file := range dataFiles {
-		saveFile(file, resources, "resources/data/", "data")
+	if !dataExists {
+		saveFile(systemMapping, filepath.Join(dataPath, "systems-mapping.json"))
 	}
 }
 
-func saveFile(file fs.DirEntry, resources embed.FS, resourceDir string, outDir string) {
+func saveFile(data []byte, path string) {
 	logger := GetLoggerInstance()
-	cwd, _ := os.Getwd()
 
-	bytes, err := resources.ReadFile(filepath.Join(resourceDir, file.Name()))
+	file, err := os.Create(path)
 	if err != nil {
-		logger.Fatal("Failed to read file", zap.String("resource_path", filepath.Join(resourceDir, file.Name())), zap.Error(err))
+		logger.Fatal("Failed to open / create / truncate", zap.String("file_path", path), zap.Error(err))
 	}
 
-	filePath := filepath.Join(cwd, outDir, file.Name())
-	if err := os.WriteFile(filePath, bytes, 0644); err != nil {
-		logger.Fatal("Failed to write file", zap.String("file_path", filePath), zap.Error(err))
+	_, err = file.Write(data)
+	if err != nil {
+		logger.Fatal("Failed to write", zap.String("file_path", path), zap.Error(err))
 	}
+
 }

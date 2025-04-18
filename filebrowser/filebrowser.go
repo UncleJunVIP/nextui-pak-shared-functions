@@ -85,11 +85,9 @@ func itemNameCleaner(filename string, stripTag bool) (string, string) {
 	// Clean up the tags
 	tag := common.TagRegex.FindStringSubmatch(cleaned)
 
-	foundTag := ""
+	foundTag := tag[1]
+
 	if len(tag) > 0 && stripTag {
-		foundTag = tag[0]
-		foundTag = strings.ReplaceAll(foundTag, "(", "")
-		foundTag = strings.ReplaceAll(foundTag, ")", "")
 		cleaned = strings.TrimSuffix(filename, tag[0])
 	}
 

@@ -18,6 +18,10 @@ type Item struct {
 	ArtURL string `json:"-"` // For RomM Support
 }
 
+func (i Item) Value() interface{} {
+	return i
+}
+
 func (i Item) MarshalLogObject(encoder zapcore.ObjectEncoder) error {
 	encoder.AddString("name", i.DisplayName)
 	encoder.AddString("filename", i.Filename)
