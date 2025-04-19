@@ -85,10 +85,14 @@ func itemNameCleaner(filename string, stripTag bool) (string, string) {
 	// Clean up the tags
 	tag := common.TagRegex.FindStringSubmatch(cleaned)
 
-	foundTag := tag[1]
+	foundTag := ""
 
-	if len(tag) > 0 && stripTag {
-		cleaned = strings.TrimSuffix(filename, tag[0])
+	if len(tag) > 0 {
+		foundTag = tag[1]
+
+		if stripTag {
+			cleaned = strings.TrimSuffix(filename, tag[0])
+		}
 	}
 
 	// For people that order their ROM directories

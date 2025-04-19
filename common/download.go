@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 func HttpDownload(rootURL, remotePath, localPath, filename string) (savedPath string, error error) {
@@ -29,7 +30,11 @@ func HttpDownloadRename(rootURL, remotePath, localPath, filename, rename string)
 		return "", fmt.Errorf("unable to build download url: %w", err)
 	}
 
-	resp, err := http.Get(sourceURL)
+	httpClient := &http.Client{
+		Timeout: 60 * time.Second,
+	}
+
+	resp, err := httpClient.Get(sourceURL)
 	if err != nil {
 		return "", fmt.Errorf("failed to download file: %w", err)
 	}
