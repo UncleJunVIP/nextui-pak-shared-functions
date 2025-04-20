@@ -39,22 +39,35 @@ func (c *FileBrowser) CWD(newDirectory string) error {
 		displayName, tag := itemNameCleaner(file.Name(), false)
 
 		directoryFileCount := -1
+		isMultiDisc := false
 		if file.IsDir() {
 			dir, err := os.ReadDir(path.Join(c.WorkingDirectory, file.Name()))
 			if err != nil {
 				c.logger.Error("Failed to read directory", zap.String("path", path.Join(c.WorkingDirectory, file.Name())), zap.Error(err))
 			}
 
+			for _, f := range dir {
+				if strings.Contains(f.Name(), "Disc") ||
+					strings.Contains(f.Name(), "Disk") ||
+					strings.Contains(f.Name(), "CD") ||
+					strings.Contains(f.Name(), ".bin") ||
+					strings.Contains(f.Name(), ".cue") {
+					isMultiDisc = true
+					break
+				}
+			}
+
 			directoryFileCount = len(dir)
 		}
 
 		item := models.Item{
-			DisplayName:        displayName,
-			Tag:                tag,
-			Filename:           file.Name(),
-			Path:               path.Join(c.WorkingDirectory, file.Name()),
-			IsDirectory:        file.IsDir(),
-			DirectoryFileCount: directoryFileCount,
+			DisplayName:          displayName,
+			Tag:                  tag,
+			Filename:             file.Name(),
+			Path:                 path.Join(c.WorkingDirectory, file.Name()),
+			IsDirectory:          !isMultiDisc && file.IsDir(),
+			IsMultiDiscDirectory: isMultiDisc,
+			DirectoryFileCount:   directoryFileCount,
 		}
 
 		if !file.IsDir() || directoryFileCount > 0 { // Hide them empty directories the lunatics leave behind...
@@ -76,7 +89,7 @@ func (c *FileBrowser) DisplayCurrentDirectory(title string) (models.Item, error)
 		return models.Item{}, err
 	}
 
-	return c.HumanReadableLS[res.Value], nil
+	return c.HumanReadableLS[res.SelectedValue], nil
 }
 
 func itemNameCleaner(filename string, stripTag bool) (string, string) {

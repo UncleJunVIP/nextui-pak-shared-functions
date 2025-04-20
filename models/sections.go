@@ -11,6 +11,8 @@ type Section struct {
 	HostSubdirectory string `yaml:"host_subdirectory"`
 
 	RomMPlatformID string `yaml:"romm_platform_id"`
+
+	CollectionFilePath string `yaml:"collection_file_path"`
 }
 
 type Sections []Section

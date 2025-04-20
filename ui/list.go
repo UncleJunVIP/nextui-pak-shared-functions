@@ -41,15 +41,15 @@ func DisplayList(entries Entries, title string, actionText string, options ...st
 
 	if err := cmd.Run(); err != nil && cmd.ProcessState.ExitCode() > 5 {
 		return models.ListSelection{
-			Value:    "",
-			ExitCode: cmd.ProcessState.ExitCode(),
+			SelectedValue: "",
+			ExitCode:      cmd.ProcessState.ExitCode(),
 		}, err
 	}
 
 	out := strings.TrimSpace(stdoutbuf.String())
 
 	return models.ListSelection{
-		Value:    out,
-		ExitCode: cmd.ProcessState.ExitCode(),
+		SelectedValue: out,
+		ExitCode:      cmd.ProcessState.ExitCode(),
 	}, nil
 }
