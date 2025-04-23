@@ -95,22 +95,28 @@ func (c *FileBrowser) DisplayCurrentDirectory(title string) (models.Item, error)
 func itemNameCleaner(filename string, stripTag bool) (string, string) {
 	cleaned := filepath.Clean(filename)
 
-	// Clean up the tags
-	tag := common.TagRegex.FindStringSubmatch(cleaned)
+	tags := common.TagRegex.FindAllStringSubmatch(cleaned, -1)
 
+	var foundTags []string
 	foundTag := ""
 
-	if len(tag) > 0 {
-		foundTag = tag[1]
+	if len(tags) > 0 {
+		for _, tagPair := range tags {
+			foundTags = append(foundTags, tagPair[0])
+		}
+
+		foundTag = strings.Join(foundTags, " ")
 
 		if stripTag {
-			cleaned = strings.TrimSuffix(filename, tag[0])
+			cleaned = strings.ReplaceAll(filename, foundTag, "")
 		}
+
 	}
 
-	// For people that order their ROM directories
-	if strings.Contains(cleaned, ") ") {
-		cleaned = strings.Split(cleaned, ") ")[1]
+	orderedFolderRegex := common.OrderedFolderRegex.FindStringSubmatch(cleaned)
+
+	if len(orderedFolderRegex) > 0 {
+		cleaned = strings.ReplaceAll(cleaned, orderedFolderRegex[0], "")
 	}
 
 	// Lose the extension
