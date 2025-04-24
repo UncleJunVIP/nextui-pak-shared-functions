@@ -36,7 +36,7 @@ func (c *FileBrowser) CWD(newDirectory string) error {
 
 	var items []models.Item
 	for _, file := range files {
-		displayName, tag := itemNameCleaner(file.Name(), false)
+		displayName, tag := ItemNameCleaner(file.Name(), false)
 
 		directoryFileCount := -1
 		isMultiDisc := false
@@ -92,7 +92,7 @@ func (c *FileBrowser) DisplayCurrentDirectory(title string) (models.Item, error)
 	return c.HumanReadableLS[res.SelectedValue], nil
 }
 
-func itemNameCleaner(filename string, stripTag bool) (string, string) {
+func ItemNameCleaner(filename string, stripTag bool) (string, string) {
 	cleaned := filepath.Clean(filename)
 
 	tags := common.TagRegex.FindAllStringSubmatch(cleaned, -1)
