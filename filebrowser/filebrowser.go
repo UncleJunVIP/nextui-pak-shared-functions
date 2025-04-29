@@ -70,7 +70,7 @@ func (c *FileBrowser) CWD(newDirectory string, hideEmpty bool) error {
 			DirectoryFileCount:   directoryFileCount,
 		}
 
-		if !file.IsDir() || (directoryFileCount > 0 && !hideEmpty) { // Hide them empty directories the lunatics leave behind...
+		if !file.IsDir() || (file.IsDir() && (directoryFileCount > 0 || !hideEmpty)) {
 			items = append(items, item)
 			updatedHumanReadable[displayName] = item
 		}
