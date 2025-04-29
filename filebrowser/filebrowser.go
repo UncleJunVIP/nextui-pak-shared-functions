@@ -25,7 +25,7 @@ func NewFileBrowser(logger *zap.Logger) *FileBrowser {
 	}
 }
 
-func (c *FileBrowser) CWD(newDirectory string) error {
+func (c *FileBrowser) CWD(newDirectory string, hideEmpty bool) error {
 	files, err := os.ReadDir(newDirectory)
 	if err != nil {
 		return fmt.Errorf("failed to read directory %w", err)
@@ -70,7 +70,7 @@ func (c *FileBrowser) CWD(newDirectory string) error {
 			DirectoryFileCount:   directoryFileCount,
 		}
 
-		if !file.IsDir() || directoryFileCount > 0 { // Hide them empty directories the lunatics leave behind...
+		if !file.IsDir() || (directoryFileCount > 0 && !hideEmpty) { // Hide them empty directories the lunatics leave behind...
 			items = append(items, item)
 			updatedHumanReadable[displayName] = item
 		}
