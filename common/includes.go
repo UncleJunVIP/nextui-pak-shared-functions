@@ -10,33 +10,13 @@ import (
 //go:embed resources/data/systems-mapping.json
 var systemMapping []byte
 
-//go:embed resources/bin/tg5040/minui-keyboard
-var keyboard []byte
-
-//go:embed resources/bin/tg5040/minui-list
-var list []byte
-
-//go:embed resources/bin/tg5040/minui-presenter
-var presenter []byte
-
 func InitIncludes() {
 	logger := GetLoggerInstance()
 	cwd, _ := os.Getwd()
 
-	binPath := filepath.Join(cwd, "bin/tg5040")
 	dataPath := filepath.Join(cwd, "data")
 
-	binExists := false
 	dataExists := false
-
-	if _, err := os.Stat(binPath); os.IsNotExist(err) {
-		err := os.MkdirAll(binPath, 0755)
-		if err != nil {
-			logger.Fatal("Failed to create bin directory", zap.Error(err))
-		}
-	} else {
-		binExists = true
-	}
 
 	if _, err := os.Stat(dataPath); os.IsNotExist(err) {
 		err := os.MkdirAll(dataPath, 0755)
@@ -45,16 +25,6 @@ func InitIncludes() {
 		}
 	} else {
 		dataExists = true
-	}
-
-	if binExists && dataExists {
-		return
-	}
-
-	if !binExists {
-		saveFile(keyboard, filepath.Join(binPath, "minui-keyboard"))
-		saveFile(list, filepath.Join(binPath, "minui-list"))
-		saveFile(presenter, filepath.Join(binPath, "minui-presenter"))
 	}
 
 	if !dataExists {

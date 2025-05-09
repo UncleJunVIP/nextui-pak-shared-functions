@@ -3,7 +3,6 @@ module github.com/UncleJunVIP/nextui-pak-shared-functions
 go 1.24
 
 require (
-	github.com/UncleJunVIP/certifiable v1.0.0
 	github.com/activcoding/HTML-Table-to-JSON v0.0.4
 	go.uber.org/atomic v1.11.0
 	go.uber.org/zap v1.27.0

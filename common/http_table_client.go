@@ -123,10 +123,7 @@ func (c *HttpTableClient) ListDirectory(subdirectory string) (models.Items, erro
 	return nil, nil
 }
 
-func (c *HttpTableClient) DownloadFile(remotePath, localPath, filename string) (string, error) {
-	return HttpDownload(c.RootURL, remotePath, localPath, filename)
-}
-
-func (c *HttpTableClient) DownloadFileRename(remotePath, localPath, filename, rename string) (string, error) {
-	panic("not implemented")
+func (c *HttpTableClient) BuildDownloadHeaders() map[string]string {
+	headers := make(map[string]string)
+	return headers
 }

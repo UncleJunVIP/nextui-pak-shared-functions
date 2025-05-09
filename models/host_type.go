@@ -5,7 +5,6 @@ import "qlova.tech/sum"
 type HostType struct {
 	APACHE,
 	NGINX,
-	SMB,
 	ROMM,
 	MEGATHREAD,
 	CUSTOM sum.Int[HostType]

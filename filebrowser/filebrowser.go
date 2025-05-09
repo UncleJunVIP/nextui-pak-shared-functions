@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/models"
-	"github.com/UncleJunVIP/nextui-pak-shared-functions/ui"
 	"go.uber.org/zap"
 	"os"
 	"path"
@@ -80,16 +79,6 @@ func (c *FileBrowser) CWD(newDirectory string, hideEmpty bool) error {
 	c.HumanReadableLS = updatedHumanReadable
 
 	return nil
-}
-
-func (c *FileBrowser) DisplayCurrentDirectory(title string) (models.Item, error) {
-	res, err := ui.DisplayList(c.Items, title, "")
-
-	if err != nil {
-		return models.Item{}, err
-	}
-
-	return c.HumanReadableLS[res.SelectedValue], nil
 }
 
 func ItemNameCleaner(filename string, stripTag bool) (string, string) {
