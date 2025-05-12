@@ -4,10 +4,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/models"
+	"go.uber.org/zap"
+	"io"
+	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
 	"qlova.tech/sum"
+	"strings"
+	"time"
 )
 
 const ThumbnailServerRoot = "https://thumbnails.libretro.com"
@@ -72,4 +78,56 @@ func (c *ThumbnailClient) ListDirectory(subdirectory string) (models.Items, erro
 func (c *ThumbnailClient) BuildDownloadHeaders() map[string]string {
 	headers := make(map[string]string)
 	return headers
+}
+
+func (c *ThumbnailClient) DownloadArt(remotePath, localPath, filename, rename string) (savedPath string, error error) {
+	logger := GetLoggerInstance()
+
+	logger.Debug("Downloading file...",
+		zap.String("remotePath", remotePath),
+		zap.String("localPath", localPath),
+		zap.String("filename", filename),
+		zap.String("rename", rename))
+
+	sourceURL, err := url.JoinPath(c.RootURL, remotePath, filename)
+	if err != nil {
+		return "", fmt.Errorf("unable to build download url: %w", err)
+	}
+
+	httpClient := &http.Client{
+		Timeout: 60 * time.Second,
+	}
+
+	resp, err := httpClient.Get(sourceURL)
+	if err != nil {
+		return "", fmt.Errorf("failed to download file: %w", err)
+	}
+	defer resp.Body.Close()
+
+	err = os.MkdirAll(localPath, os.ModePerm)
+	if err != nil {
+		return "", fmt.Errorf("failed to create directory: %w", err)
+	}
+
+	fn := filename
+
+	if rename != "" {
+		// Used by the thumbnail downloader when a filename doesn't have the matching tags
+		imageExt := filepath.Ext(filename)
+		fn = strings.ReplaceAll(rename, filepath.Ext(rename), "")
+		fn = fn + imageExt
+	}
+
+	f, err := os.Create(filepath.Join(localPath, fn))
+	if err != nil {
+		return "", fmt.Errorf("failed to create file: %w", err)
+	}
+	defer f.Close()
+
+	_, err = io.Copy(f, resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("failed to save file: %w", err)
+	}
+
+	return filepath.Join(localPath, fn), nil
 }
