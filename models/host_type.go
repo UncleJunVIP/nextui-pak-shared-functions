@@ -3,11 +3,9 @@ package models
 import "qlova.tech/sum"
 
 type HostType struct {
-	APACHE,
-	NGINX,
 	ROMM,
 	MEGATHREAD,
-	CUSTOM sum.Int[HostType]
+	APACHE sum.Int[HostType] // Apache is an internal type
 }
 
 var HostTypes = sum.Int[HostType]{}.Sum()

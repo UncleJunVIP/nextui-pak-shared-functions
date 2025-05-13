@@ -112,7 +112,6 @@ func (c *ThumbnailClient) DownloadArt(remotePath, localPath, filename, rename st
 	fn := filename
 
 	if rename != "" {
-		// Used by the thumbnail downloader when a filename doesn't have the matching tags
 		imageExt := filepath.Ext(filename)
 		fn = strings.ReplaceAll(rename, filepath.Ext(rename), "")
 		fn = fn + imageExt

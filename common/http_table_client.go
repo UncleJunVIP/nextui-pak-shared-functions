@@ -90,17 +90,6 @@ func (c *HttpTableClient) ListDirectory(subdirectory string) (models.Items, erro
 			cleaned = strings.ReplaceAll(cleaned, "File Size", "file_size")
 			cleaned = strings.ReplaceAll(cleaned, "Date", "date")
 		}
-	case models.HostTypes.CUSTOM:
-		{
-			for oldValue, newValue := range c.SourceReplacements {
-				cleaned = strings.ReplaceAll(cleaned, oldValue, newValue)
-			}
-
-			cleaned = strings.ReplaceAll(cleaned, c.TableColumns.FilenameHeader, "filename")
-			cleaned = strings.ReplaceAll(cleaned, c.TableColumns.FileSizeHeader, "file_size")
-			cleaned = strings.ReplaceAll(cleaned, c.TableColumns.DateHeader, "date")
-		}
-
 	}
 
 	var items models.Items
