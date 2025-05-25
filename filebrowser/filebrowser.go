@@ -29,7 +29,7 @@ func (c *FileBrowser) CWD(newDirectory string, hideEmpty bool) error {
 	c.WorkingDirectory = newDirectory
 	updatedHumanReadable := make(map[string]models.Item)
 
-	allItems, err := FindAllItemsWithDepth(c.WorkingDirectory, -1)
+	allItems, err := FindAllItemsWithDepth(c.WorkingDirectory, 1)
 	if err != nil {
 		return fmt.Errorf("unable to list directory: %w", err)
 	}
@@ -64,6 +64,10 @@ func FindAllItemsWithDepth(rootPath string, maxDepth int) ([]models.Item, error)
 		}
 
 		if relPath == "." {
+			return nil
+		}
+
+		if strings.HasPrefix(filepath.Base(path), ".") {
 			return nil
 		}
 
