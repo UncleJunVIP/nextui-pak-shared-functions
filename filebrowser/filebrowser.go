@@ -9,6 +9,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 type FileBrowser struct {
@@ -25,53 +26,19 @@ func NewFileBrowser(logger *zap.Logger) *FileBrowser {
 }
 
 func (c *FileBrowser) CWD(newDirectory string, hideEmpty bool) error {
-	files, err := os.ReadDir(newDirectory)
-	if err != nil {
-		return fmt.Errorf("failed to read directory %w", err)
-	}
-
 	c.WorkingDirectory = newDirectory
 	updatedHumanReadable := make(map[string]models.Item)
 
+	allItems, err := FindAllItemsWithDepth(c.WorkingDirectory, -1)
+	if err != nil {
+		return fmt.Errorf("unable to list directory: %w", err)
+	}
+
 	var items []models.Item
-	for _, file := range files {
-		displayName, tag := ItemNameCleaner(file.Name(), false)
-
-		directoryFileCount := -1
-		isMultiDisc := false
-		if file.IsDir() {
-			dir, err := os.ReadDir(path.Join(c.WorkingDirectory, file.Name()))
-			if err != nil {
-				c.logger.Error("Failed to read directory", zap.String("path", path.Join(c.WorkingDirectory, file.Name())), zap.Error(err))
-			}
-
-			for _, f := range dir {
-				if strings.Contains(f.Name(), "Disc") ||
-					strings.Contains(f.Name(), "Disk") ||
-					strings.Contains(f.Name(), "CD") ||
-					strings.Contains(f.Name(), ".bin") ||
-					strings.Contains(f.Name(), ".cue") {
-					isMultiDisc = true
-					break
-				}
-			}
-
-			directoryFileCount = len(dir)
-		}
-
-		item := models.Item{
-			DisplayName:          displayName,
-			Tag:                  tag,
-			Filename:             file.Name(),
-			Path:                 path.Join(c.WorkingDirectory, file.Name()),
-			IsDirectory:          !isMultiDisc && file.IsDir(),
-			IsMultiDiscDirectory: isMultiDisc,
-			DirectoryFileCount:   directoryFileCount,
-		}
-
-		if !file.IsDir() || (file.IsDir() && (directoryFileCount > 0 || !hideEmpty)) {
+	for _, item := range allItems {
+		if !item.IsDirectory || (item.IsDirectory && (item.DirectoryFileCount > 0 || !hideEmpty)) {
 			items = append(items, item)
-			updatedHumanReadable[displayName] = item
+			updatedHumanReadable[item.DisplayName] = item
 		}
 	}
 
@@ -79,6 +46,88 @@ func (c *FileBrowser) CWD(newDirectory string, hideEmpty bool) error {
 	c.HumanReadableLS = updatedHumanReadable
 
 	return nil
+}
+
+func FindAllItemsWithDepth(rootPath string, maxDepth int) ([]models.Item, error) {
+	var items []models.Item
+
+	dirCounts := make(map[string]int)
+
+	err := filepath.Walk(rootPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		relPath, err := filepath.Rel(rootPath, path)
+		if err != nil {
+			return err
+		}
+
+		if relPath == "." {
+			return nil
+		}
+
+		if maxDepth >= 0 {
+			depth := strings.Count(relPath, string(os.PathSeparator)) + 1
+
+			if depth > maxDepth {
+				if info.IsDir() {
+					return filepath.SkipDir
+				}
+				return nil
+			}
+		}
+
+		displayName, tag := ItemNameCleaner(info.Name(), false)
+
+		item := models.Item{
+			DisplayName:  displayName,
+			Filename:     info.Name(),
+			Path:         path,
+			IsDirectory:  info.IsDir(),
+			LastModified: info.ModTime().Format(time.RFC3339),
+			Tag:          tag,
+		}
+
+		if info.IsDir() {
+			item.FileSize = "-"
+			item.DirectoryFileCount = dirCounts[path]
+			contents, err := ListFilesInFolder(item.Path, false)
+			if err != nil {
+				return err
+			}
+
+			for _, f := range contents {
+				if strings.Contains(f.DisplayName, "Disc") ||
+					strings.Contains(f.DisplayName, "Disk") ||
+					strings.Contains(f.DisplayName, "CD") ||
+					strings.Contains(f.DisplayName, ".bin") ||
+					strings.Contains(f.DisplayName, ".cue") {
+					item.IsMultiDiscDirectory = true
+					break
+				}
+			}
+		}
+
+		items = append(items, item)
+		return nil
+	})
+
+	return items, err
+}
+
+func ListFilesInFolder(folderPath string, recursive bool) ([]models.Item, error) {
+	depth := 1
+	if recursive {
+		depth = -1
+	}
+
+	items, err := FindAllItemsWithDepth(folderPath, depth)
+	if err != nil {
+		return nil, fmt.Errorf("error listing files: %w", err)
+	}
+
+	return items, nil
 }
 
 func ItemNameCleaner(filename string, stripTag bool) (string, string) {
