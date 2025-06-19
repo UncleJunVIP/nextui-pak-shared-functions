@@ -51,8 +51,6 @@ func (c *FileBrowser) CWD(newDirectory string, hideEmpty bool) error {
 func FindAllItemsWithDepth(rootPath string, maxDepth int) ([]models.Item, error) {
 	var items []models.Item
 
-	dirCounts := make(map[string]int)
-
 	err := filepath.Walk(rootPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -95,11 +93,13 @@ func FindAllItemsWithDepth(rootPath string, maxDepth int) ([]models.Item, error)
 
 		if info.IsDir() {
 			item.FileSize = "-"
-			item.DirectoryFileCount = dirCounts[path]
 			contents, err := ListFilesInFolder(item.Path, false)
+
 			if err != nil {
 				return err
 			}
+
+			item.DirectoryFileCount = len(contents)
 
 			for _, f := range contents {
 				if strings.Contains(f.DisplayName, "Disc") ||

@@ -1,0 +1,11 @@
+**/.DS_Store
+.DS_Store
+/*.iml
+/*.log
+/.cache/*
+/.idea/
+/build/
+/certs/*
+/.local/config.yml
+/resources/fonts
+/config.yml
