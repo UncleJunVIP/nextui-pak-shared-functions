@@ -18,6 +18,14 @@ import (
 
 const ThumbnailServerRoot = "https://thumbnails.libretro.com"
 
+var InMemoryCache map[string]map[string]models.Items
+
+func init() {
+	if InMemoryCache == nil {
+		InMemoryCache = make(map[string]map[string]models.Items)
+	}
+}
+
 type ThumbnailClient struct {
 	HttpTableClient
 	SystemMapping   map[string]string
@@ -66,10 +74,21 @@ func (c *ThumbnailClient) Close() error {
 }
 
 func (c *ThumbnailClient) ListDirectory(subdirectory string) (models.Items, error) {
+	if cachedType, ok := InMemoryCache[c.ArtDownloadType.String()]; ok {
+		if artList, ok := cachedType[subdirectory]; ok {
+			return artList, nil
+		}
+	}
+
 	artList, err := c.HttpTableClient.ListDirectory(subdirectory)
 
 	if err != nil {
 		return nil, fmt.Errorf("unable to list thumbnail directory: %w", err)
+	}
+
+	if _, ok := InMemoryCache[c.ArtDownloadType.String()]; !ok {
+		InMemoryCache[c.ArtDownloadType.String()] = make(map[string]models.Items)
+		InMemoryCache[c.ArtDownloadType.String()][subdirectory] = artList
 	}
 
 	return artList, nil
