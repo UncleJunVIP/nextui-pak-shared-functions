@@ -8,7 +8,7 @@ import (
 func DeleteFile(path string) bool {
 	logger := GetLoggerInstance()
 
-	err := os.Remove(path)
+	err := os.RemoveAll(path)
 	if err != nil {
 		logger.Error("Issue removing file",
 			zap.String("path", path),
