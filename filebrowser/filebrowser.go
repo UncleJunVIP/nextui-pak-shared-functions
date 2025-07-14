@@ -26,10 +26,14 @@ func NewFileBrowser(logger *zap.Logger) *FileBrowser {
 }
 
 func (c *FileBrowser) CWD(newDirectory string, hideEmpty bool) error {
+	return c.CWDDepth(newDirectory, hideEmpty, 1)
+}
+
+func (c *FileBrowser) CWDDepth(newDirectory string, hideEmpty bool, maxDepth int) error {
 	c.WorkingDirectory = newDirectory
 	updatedHumanReadable := make(map[string]models.Item)
 
-	allItems, err := FindAllItemsWithDepth(c.WorkingDirectory, 1)
+	allItems, err := FindAllItemsWithDepth(c.WorkingDirectory, maxDepth)
 	if err != nil {
 		return fmt.Errorf("unable to list directory: %w", err)
 	}
@@ -101,16 +105,17 @@ func FindAllItemsWithDepth(rootPath string, maxDepth int) ([]models.Item, error)
 
 			item.DirectoryFileCount = len(contents)
 
+			item.IsSelfContainedDirectory = isSelfContainedDirectory(item.Filename, contents)
+
 			for _, f := range contents {
-				if strings.Contains(f.DisplayName, "Disc") ||
-					strings.Contains(f.DisplayName, "Disk") ||
-					strings.Contains(f.DisplayName, "CD") ||
-					strings.Contains(f.DisplayName, ".bin") ||
-					strings.Contains(f.DisplayName, ".cue") {
+				if strings.Contains(f.DisplayName, "(Disc") ||
+					strings.Contains(f.DisplayName, "(Disk") {
 					item.IsMultiDiscDirectory = true
+					item.IsSelfContainedDirectory = true
 					break
 				}
 			}
+
 		}
 
 		items = append(items, item)
@@ -118,6 +123,57 @@ func FindAllItemsWithDepth(rootPath string, maxDepth int) ([]models.Item, error)
 	})
 
 	return items, err
+}
+
+func isSelfContainedDirectory(directoryName string, contents []models.Item) bool {
+	// Rule 1: If directory contains a directory, it's false
+	for _, item := range contents {
+		if item.IsDirectory {
+			return false
+		}
+	}
+
+	// Rule 2: One file with same name as directory, .m3u extension, only .m3u
+	m3uCount := 0
+	hasMatchingM3u := false
+	for _, item := range contents {
+		if strings.HasSuffix(strings.ToLower(item.Filename), ".m3u") {
+			m3uCount++
+			itemNameWithoutExt := strings.TrimSuffix(item.Filename, filepath.Ext(item.Filename))
+			if itemNameWithoutExt == directoryName {
+				hasMatchingM3u = true
+			}
+		}
+	}
+	if m3uCount == 1 && hasMatchingM3u {
+		return true
+	}
+
+	// Rule 3: One file with same name as directory, .cue extension, only .cue
+	cueCount := 0
+	hasMatchingCue := false
+	for _, item := range contents {
+		if strings.HasSuffix(strings.ToLower(item.Filename), ".cue") {
+			cueCount++
+			itemNameWithoutExt := strings.TrimSuffix(item.Filename, filepath.Ext(item.Filename))
+			if itemNameWithoutExt == directoryName {
+				hasMatchingCue = true
+			}
+		}
+	}
+	if cueCount == 1 && hasMatchingCue {
+		return true
+	}
+
+	// Rule 4: Only one file in directory and it has same name as directory
+	if len(contents) == 1 {
+		itemNameWithoutExt := strings.TrimSuffix(contents[0].Filename, filepath.Ext(contents[0].Filename))
+		if itemNameWithoutExt == directoryName {
+			return true
+		}
+	}
+
+	return false
 }
 
 func ListFilesInFolder(folderPath string, recursive bool) ([]models.Item, error) {
