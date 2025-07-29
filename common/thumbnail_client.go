@@ -1,7 +1,6 @@
 package common
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"go.uber.org/zap"
@@ -46,14 +45,7 @@ func NewThumbnailClient(artDownloadType sum.Int[models.ArtDownloadType]) *Thumbn
 		ArtDownloadType: artDownloadType,
 	}
 
-	cwd, _ := os.Getwd()
-
-	jsonPath := filepath.Join(cwd, "data", "systems-mapping.json")
-	file, err := os.Open(jsonPath)
-	if err == nil {
-		defer file.Close()
-		_ = json.NewDecoder(file).Decode(&client.SystemMapping)
-	}
+	client.SystemMapping = LoadSystemMapping()
 
 	return client
 }

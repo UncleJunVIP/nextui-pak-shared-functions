@@ -6,7 +6,6 @@ import (
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"go.uber.org/zap"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -84,7 +83,7 @@ func FindAllItemsWithDepth(rootPath string, maxDepth int) ([]models.Item, error)
 			}
 		}
 
-		displayName, tag := ItemNameCleaner(info.Name(), false)
+		displayName, tag := common.ItemNameCleaner(info.Name(), false)
 
 		item := models.Item{
 			DisplayName:  displayName,
@@ -188,39 +187,4 @@ func ListFilesInFolder(folderPath string, recursive bool) ([]models.Item, error)
 	}
 
 	return items, nil
-}
-
-func ItemNameCleaner(filename string, stripTag bool) (string, string) {
-	cleaned := filepath.Clean(filename)
-
-	tags := common.TagRegex.FindAllStringSubmatch(cleaned, -1)
-
-	var foundTags []string
-	foundTag := ""
-
-	if len(tags) > 0 {
-		for _, tagPair := range tags {
-			foundTags = append(foundTags, tagPair[0])
-		}
-
-		foundTag = strings.Join(foundTags, " ")
-
-		if stripTag {
-			cleaned = strings.ReplaceAll(filename, foundTag, "")
-		}
-
-	}
-
-	orderedFolderRegex := common.OrderedFolderRegex.FindStringSubmatch(cleaned)
-
-	if len(orderedFolderRegex) > 0 {
-		cleaned = strings.ReplaceAll(cleaned, orderedFolderRegex[0], "")
-	}
-
-	// Lose the extension
-	cleaned = strings.ReplaceAll(cleaned, path.Ext(cleaned), "")
-
-	cleaned = strings.TrimSpace(cleaned)
-
-	return cleaned, foundTag
 }
