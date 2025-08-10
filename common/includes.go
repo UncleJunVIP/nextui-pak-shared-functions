@@ -16,20 +16,14 @@ func InitIncludes() {
 
 	dataPath := filepath.Join(cwd, "data")
 
-	dataExists := false
-
 	if _, err := os.Stat(dataPath); os.IsNotExist(err) {
 		err := os.MkdirAll(dataPath, 0755)
 		if err != nil {
 			logger.Fatal("Failed to create data directory", zap.Error(err))
 		}
-	} else {
-		dataExists = true
 	}
 
-	if !dataExists {
-		saveFile(systemMapping, filepath.Join(dataPath, "systems-mapping.json"))
-	}
+	saveFile(systemMapping, filepath.Join(dataPath, "systems-mapping.json"))
 }
 
 func saveFile(data []byte, path string) {
