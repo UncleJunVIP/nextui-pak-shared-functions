@@ -85,6 +85,10 @@ func FindAllItemsWithDepth(rootPath string, maxDepth int) ([]models.Item, error)
 
 		displayName, tag := common.ItemNameCleaner(info.Name(), false)
 
+		if info.IsDir() && tag == "" && filepath.Dir(path) == common.GetRomDirectory() {
+			tag = displayName
+		}
+
 		item := models.Item{
 			DisplayName:  displayName,
 			Filename:     info.Name(),

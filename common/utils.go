@@ -16,6 +16,17 @@ func IsConnectedToInternet() bool {
 	return err == nil
 }
 
+func IsDev() bool {
+	return os.Getenv("ENVIRONMENT") == "DEV"
+}
+
+func GetRomDirectory() string {
+	if IsDev() {
+		return os.Getenv("ROM_DIRECTORY")
+	}
+	return RomDirectory
+}
+
 func ItemNameCleaner(filename string, stripTag bool) (string, string) {
 	cleaned := filepath.Clean(filename)
 
