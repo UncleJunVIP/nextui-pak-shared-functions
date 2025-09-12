@@ -3,13 +3,13 @@ package common
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/UncleJunVIP/nextui-pak-shared-functions/models"
-	converthtmltabletodata "github.com/activcoding/HTML-Table-to-JSON"
-	"go.uber.org/zap"
 	"net/http"
 	"net/url"
-	"qlova.tech/sum"
 	"strings"
+
+	"github.com/UncleJunVIP/nextui-pak-shared-functions/models"
+	converthtmltabletodata "github.com/activcoding/HTML-Table-to-JSON"
+	"qlova.tech/sum"
 )
 
 type HostType = sum.Int[models.HostType]
@@ -51,7 +51,7 @@ func (c *HttpTableClient) ListDirectory(subdirectory string) (models.Items, erro
 		return nil, fmt.Errorf("unable to build download url: %w", err)
 	}
 
-	logger.Debug("Listing Directory", zap.String("combined_url", combinedUrl))
+	logger.Debug("Listing Directory", "combined_url", combinedUrl)
 
 	u, err := url.Parse(combinedUrl)
 	if err != nil {

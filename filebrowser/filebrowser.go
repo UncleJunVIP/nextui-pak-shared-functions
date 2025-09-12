@@ -2,23 +2,24 @@ package filebrowser
 
 import (
 	"fmt"
-	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
-	"github.com/UncleJunVIP/nextui-pak-shared-functions/models"
-	"go.uber.org/zap"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
+	"github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 )
 
 type FileBrowser struct {
-	logger           *zap.Logger
+	logger           *slog.Logger
 	WorkingDirectory string
 	Items            models.Items
 	HumanReadableLS  map[string]models.Item
 }
 
-func NewFileBrowser(logger *zap.Logger) *FileBrowser {
+func NewFileBrowser(logger *slog.Logger) *FileBrowser {
 	return &FileBrowser{
 		logger: logger,
 	}

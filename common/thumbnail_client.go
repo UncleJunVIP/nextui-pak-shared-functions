@@ -2,17 +2,17 @@ package common
 
 import (
 	"fmt"
-	"github.com/UncleJunVIP/nextui-pak-shared-functions/models"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
 	"path/filepath"
-	"qlova.tech/sum"
 	"strings"
 	"time"
+
+	"github.com/UncleJunVIP/nextui-pak-shared-functions/models"
+	"qlova.tech/sum"
 )
 
 const ThumbnailServerRoot = "https://thumbnails.libretro.com"
@@ -94,11 +94,11 @@ func (c *ThumbnailClient) BuildDownloadHeaders() map[string]string {
 func (c *ThumbnailClient) DownloadArt(remotePath, localPath, filename, rename string) (savedPath string, error error) {
 	logger := GetLoggerInstance()
 
-	logger.Debug("Downloading file...",
-		zap.String("remotePath", remotePath),
-		zap.String("localPath", localPath),
-		zap.String("filename", filename),
-		zap.String("rename", rename))
+	logger.Debug("Downloading art file...",
+		"remotePath", remotePath,
+		"localPath", localPath,
+		"filename", filename,
+		"rename", rename)
 
 	sourceURL, err := url.JoinPath(c.RootURL, remotePath, filename)
 	if err != nil {

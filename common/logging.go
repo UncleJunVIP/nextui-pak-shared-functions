@@ -1,19 +1,20 @@
 package common
 
 import (
-	"go.uber.org/atomic"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
+	"io"
 	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"go.uber.org/atomic"
 )
 
 var logFile *os.File
-var atomicLevel = zap.NewAtomicLevel()
-var logger atomic.Pointer[zap.Logger]
+var logger atomic.Pointer[slog.Logger]
+var currentLevel atomic.Pointer[slog.LevelVar]
 
 var LoggerInitialized atomic.Bool
 
@@ -24,7 +25,7 @@ func LogStandardFatal(msg string, err error) {
 	log.Fatalf("%s: %v", msg, err)
 }
 
-func GetLoggerInstance() *zap.Logger {
+func GetLoggerInstance() *slog.Logger {
 	onceLogger.Do(func() {
 		logger.Store(createLogger())
 	})
@@ -32,11 +33,12 @@ func GetLoggerInstance() *zap.Logger {
 }
 
 func CloseLogger() {
-	GetLoggerInstance().Sync()
-	logFile.Close()
+	if logFile != nil {
+		logFile.Close()
+	}
 }
 
-func createLogger() *zap.Logger {
+func createLogger() *slog.Logger {
 	LoggerInitialized.Store(false)
 
 	exePath, err := os.Executable()
@@ -56,43 +58,43 @@ func createLogger() *zap.Logger {
 		LogStandardFatal("Unable to open log file!", err)
 	}
 
-	writeSyncer := zapcore.AddSync(logFile)
-	encoderConfig := zap.NewProductionEncoderConfig()
-	encoderConfig.TimeKey = "timestamp"
-	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	// Create a level variable for dynamic level changes
+	levelVar := &slog.LevelVar{}
+	levelVar.Set(slog.LevelInfo) // Default level
+	currentLevel.Store(levelVar)
 
-	core := zapcore.NewCore(
-		zapcore.NewJSONEncoder(encoderConfig),
-		writeSyncer,
-		atomicLevel,
-	)
+	// Create a multi-writer to write to both console and file
+	multiWriter := io.MultiWriter(os.Stdout, logFile)
+
+	// Create a clean JSON handler
+	handler := slog.NewJSONHandler(multiWriter, &slog.HandlerOptions{
+		Level:     levelVar,
+		AddSource: false,
+	})
 
 	LoggerInitialized.Store(true)
 
-	return zap.New(core)
+	return slog.New(handler)
 }
 
 func SetLogLevel(rawLevel string) {
-	var loggerLevel zapcore.Level
+	var level slog.Level
 
 	switch strings.ToLower(rawLevel) {
 	case "debug":
-		loggerLevel = zap.DebugLevel
+		level = slog.LevelDebug
 	case "info":
-		loggerLevel = zap.InfoLevel
+		level = slog.LevelInfo
 	case "warn", "warning":
-		loggerLevel = zap.WarnLevel
+		level = slog.LevelWarn
 	case "error":
-		loggerLevel = zap.ErrorLevel
-	case "dpanic":
-		loggerLevel = zap.DPanicLevel
-	case "panic":
-		loggerLevel = zap.PanicLevel
-	case "fatal":
-		loggerLevel = zap.FatalLevel
+		level = slog.LevelError
 	default:
-		loggerLevel = zap.InfoLevel
+		level = slog.LevelInfo
 	}
 
-	atomicLevel.SetLevel(loggerLevel)
+	// Update the level variable to change the logging level dynamically
+	if levelVar := currentLevel.Load(); levelVar != nil {
+		levelVar.Set(level)
+	}
 }
