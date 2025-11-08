@@ -115,7 +115,6 @@ func FindAllItemsWithDepth(rootPath string, maxDepth int) ([]models.Item, error)
 				if strings.Contains(f.DisplayName, "(Disc") ||
 					strings.Contains(f.DisplayName, "(Disk") {
 					item.IsMultiDiscDirectory = true
-					item.IsSelfContainedDirectory = true
 					break
 				}
 			}
