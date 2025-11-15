@@ -1,36 +1,14 @@
 package models
 
-import "go.uber.org/zap/zapcore"
-
 type Section struct {
-	Name string `yaml:"section_name"`
+	Name string `yaml:"section_name,omitempty" json:"section_name,omitempty"`
 
-	SystemTag      string `yaml:"system_tag"`
-	LocalDirectory string `yaml:"local_directory"`
+	SystemTag      string `yaml:"system_tag,omitempty" json:"system_tag,omitempty"`
+	LocalDirectory string `yaml:"local_directory,omitempty" json:"local_directory,omitempty"`
 
-	HostSubdirectory string `yaml:"host_subdirectory"`
+	HostSubdirectory string `yaml:"host_subdirectory,omitempty" json:"host_subdirectory,omitempty"`
 
-	RomMPlatformID string `yaml:"romm_platform_id"`
+	RomMPlatformID string `yaml:"romm_platform_id,omitempty" json:"romm_platform_id,omitempty"`
 
-	CollectionFilePath string `yaml:"collection_file_path"`
-}
-
-type Sections []Section
-
-func (s Sections) MarshalLogArray(encoder zapcore.ArrayEncoder) error {
-	for _, section := range s {
-		_ = encoder.AppendObject(section)
-	}
-
-	return nil
-}
-
-func (s Section) MarshalLogObject(encoder zapcore.ObjectEncoder) error {
-	encoder.AddString("name", s.Name)
-	encoder.AddString("system_tag", s.SystemTag)
-	encoder.AddString("local_directory", s.LocalDirectory)
-	encoder.AddString("host_subdirectory", s.HostSubdirectory)
-	encoder.AddString("romm_platform_id", s.RomMPlatformID)
-
-	return nil
+	CollectionFilePath string `yaml:"collection_file_path,omitempty" json:"collection_file_path,omitempty"`
 }

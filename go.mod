@@ -5,7 +5,6 @@ go 1.24
 require (
 	github.com/UncleJunVIP/gabagool v0.1.5
 	github.com/activcoding/HTML-Table-to-JSON v0.0.4
-	go.uber.org/zap v1.27.0
 	qlova.tech v0.1.1
 )
 
