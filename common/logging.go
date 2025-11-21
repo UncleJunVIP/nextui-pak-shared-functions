@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"os"
 
-	gaba "github.com/UncleJunVIP/gabagool/pkg/gabagool"
+	"github.com/UncleJunVIP/gabagool/pkg/gabagool"
 )
 
 func LogStandardFatal(msg string, err error) {
@@ -14,5 +14,5 @@ func LogStandardFatal(msg string, err error) {
 }
 
 func GetLoggerInstance() *slog.Logger {
-	return gaba.GetLoggerInstance()
+	return gabagool.GetLogger()
 }
